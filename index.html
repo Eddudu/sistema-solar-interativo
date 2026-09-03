@@ -16,7 +16,7 @@
             overflow: hidden;
             background: radial-gradient(circle at center, #0b1021 0%, #020409 100%);
             font-family: Arial, sans-serif;
-            transition: background 2s ease;
+            transition: background 3s ease;
         }
 
         /* Fundo de estrelas cintilantes estáticas */
@@ -28,7 +28,7 @@
             height: 100vh;
             z-index: 1;
             pointer-events: none;
-            transition: opacity 1.5s ease;
+            transition: opacity 3s ease;
         }
 
         .bg-star {
@@ -107,7 +107,7 @@
             font-size: 15px;
             z-index: 1000;
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-            transition: all 0.3s ease;
+            transition: all 0.3s ease, opacity 1s ease;
         }
 
         #pause-btn:hover {
@@ -128,7 +128,8 @@
             justify-content: center;
             align-items: center;
             z-index: 5;
-            transition: all 2s cubic-bezier(0.25, 1, 0.5, 1);
+            /* Transição muito mais longa e suave para a sucção */
+            transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 4s ease-in;
         }
 
         /* O Sol Real */
@@ -214,9 +215,9 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Sucção do Sistema */
+        /* Sucção suave e direcionada para o canto superior direito (Gargantua) */
         .solar-system.sucked {
-            transform: translate(35vw, -40vh) scale(0) rotate(1080deg) !important;
+            transform: translate(37vw, -42vh) scale(0.03) rotate(360deg) !important;
             opacity: 0;
         }
 
@@ -458,7 +459,7 @@
             pauseBtn.innerText = isPaused ? "Retomar Órbitas ▶️" : "Pausar Órbitas ⏸️";
         });
 
-        // 5. Lógica do Gargantua
+        // 5. Lógica do Gargantua (Sucção mais suave e elegante)
         const gargantua = document.getElementById('gargantua');
 
         gargantua.addEventListener('click', () => {
