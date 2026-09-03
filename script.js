@@ -22,7 +22,7 @@ for (let i = 0; i < numberOfStars; i++) {
     starfield.appendChild(star);
 }
 
-// 2. Banco de dados com informações e ícones separados e corretos para cada astro
+// 2. Banco de dados com ícones corretos para cada astro
 const planetData = {
     sun: {
         icon: "☀️",
@@ -89,7 +89,7 @@ const planetData = {
     }
 };
 
-// 3. Controle do Modal e Cliques em todos os Astros
+// 3. Controle do Modal e Cliques
 const modal = document.getElementById('planet-modal');
 const modalIcon = document.getElementById('modal-icon');
 const modalTitle = document.getElementById('modal-title');
@@ -120,14 +120,13 @@ closeModalBtn.addEventListener('click', () => {
     modal.classList.remove('active');
 });
 
-// Fecha o modal ao clicar fora dele
 window.addEventListener('click', (e) => {
     if (!modal.contains(e.target) && !e.target.classList.contains('planet') && !e.target.classList.contains('sun')) {
         modal.classList.remove('active');
     }
 });
 
-// 4. Lógica do Botão de Pausar Órbitas
+// 4. Lógica do Botão de Pausa
 const pauseBtn = document.getElementById('pause-btn');
 const solarSystem = document.querySelector('.solar-system');
 let isPaused = false;
@@ -138,7 +137,7 @@ pauseBtn.addEventListener('click', () => {
     pauseBtn.innerText = isPaused ? "Retomar Órbitas ▶️" : "Pausar Órbitas ⏸️";
 });
 
-// 5. Lógica do Buraco Negro Gargantua (Sucção real para o canto superior direito)
+// 5. Lógica do Gargantua
 const gargantua = document.getElementById('gargantua');
 
 gargantua.addEventListener('click', () => {
