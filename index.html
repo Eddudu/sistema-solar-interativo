@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Solar Interativo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Céu estrelado gerado via JavaScript -->
+    <div id="starfield"></div>
+
+    <!-- Buraco Negro Gargantua no canto superior direito -->
+    <div id="gargantua" title="Gargantua (Buraco Negro)">
+        <div class="gargantua-disk"></div>
+        <div class="gargantua-hole"></div>
+    </div>
+
+    <!-- Botão de Pausa / Retomar na parte inferior central -->
+    <button id="pause-btn">Pausar Órbitas ⏸️</button>
+
+    <!-- Container do Sistema Solar -->
+    <div class="solar-system">
+        <!-- O Sol Real (Sem emoji) -->
+        <div class="sun" data-planet="sun" title="Sol"></div>
+
+        <!-- Órbitas e Planetas -->
+        <div class="orbit mercury-orbit"><div class="planet mercury" data-planet="mercury" title="Mercúrio"></div></div>
+        <div class="orbit venus-orbit"><div class="planet venus" data-planet="venus" title="Vênus"></div></div>
+        <div class="orbit earth-orbit"><div class="planet earth" data-planet="earth" title="Terra"></div></div>
+        <div class="orbit mars-orbit"><div class="planet mars" data-planet="mars" title="Marte"></div></div>
+        <div class="orbit jupiter-orbit"><div class="planet jupiter" data-planet="jupiter" title="Júpiter"></div></div>
+        <div class="orbit saturn-orbit"><div class="planet saturn" data-planet="saturn" title="Saturno"><div class="saturn-rings"></div></div></div>
+        <div class="orbit uranus-orbit"><div class="planet uranus" data-planet="uranus" title="Urano"></div></div>
+        <div class="orbit neptune-orbit"><div class="planet neptune" data-planet="neptune" title="Netuno"></div></div>
+    </div>
+
+    <!-- Caixa Modal de Informações Detalhadas -->
+    <div id="planet-modal">
+        <h2 id="modal-heading"><span id="modal-icon"></span> <span id="modal-title">Título</span></h2>
+        <p><strong>Distância do Sol:</strong> <span id="modal-distance"></span></p>
+        <p><strong>Massa:</strong> <span id="modal-mass"></span></p>
+        <p id="modal-desc"></p>
+        <button id="close-modal">Fechar</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
