@@ -1,6 +1,6 @@
-// 1. Geração automática de fundo estrelado cintilante
+// ===== 1. Geração automática de fundo estrelado cintilante =====
 const starfield = document.getElementById('starfield');
-const numberOfStars = 150;
+const numberOfStars = 120; // Reduzido para melhorar performance
 
 for (let i = 0; i < numberOfStars; i++) {
     const star = document.createElement('div');
@@ -22,7 +22,7 @@ for (let i = 0; i < numberOfStars; i++) {
     starfield.appendChild(star);
 }
 
-// 2. Banco de dados com ícones corretos para cada astro
+// ===== 2. Banco de dados com informações dos astros =====
 const planetData = {
     sun: {
         icon: "☀️",
@@ -89,7 +89,7 @@ const planetData = {
     }
 };
 
-// 3. Controle do Modal e Cliques
+// ===== 3. Controle do Modal e Cliques =====
 const modal = document.getElementById('planet-modal');
 const modalIcon = document.getElementById('modal-icon');
 const modalTitle = document.getElementById('modal-title');
@@ -98,35 +98,57 @@ const modalMass = document.getElementById('modal-mass');
 const modalDesc = document.getElementById('modal-desc');
 const closeModalBtn = document.getElementById('close-modal');
 const astros = document.querySelectorAll('.sun, .planet');
+let lastFocusedElement = null; // Para devolver o foco após fechar o modal
+
+function openModal(key) {
+    const data = planetData[key];
+    if (data) {
+        modalIcon.innerText = data.icon;
+        modalTitle.innerText = data.title;
+        modalDistance.innerText = data.distance;
+        modalMass.innerText = data.mass;
+        modalDesc.innerText = data.desc;
+        modal.classList.add('active');
+        
+        // Guarda quem estava focado e move o foco para o botão fechar
+        lastFocusedElement = document.activeElement;
+        closeModalBtn.focus();
+    }
+}
+
+function closeModal() {
+    modal.classList.remove('active');
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
+}
 
 astros.forEach(astro => {
     astro.addEventListener('click', (e) => {
         e.stopPropagation();
         const key = astro.getAttribute('data-planet');
-        const data = planetData[key];
-
-        if (data) {
-            modalIcon.innerText = data.icon;
-            modalTitle.innerText = data.title;
-            modalDistance.innerText = data.distance;
-            modalMass.innerText = data.mass;
-            modalDesc.innerText = data.desc;
-            modal.classList.add('active');
-        }
+        openModal(key);
     });
 });
 
-closeModalBtn.addEventListener('click', () => {
-    modal.classList.remove('active');
-});
+closeModalBtn.addEventListener('click', closeModal);
 
+// Fecha o modal ao clicar fora
 window.addEventListener('click', (e) => {
-    if (!modal.contains(e.target) && !e.target.classList.contains('planet') && !e.target.classList.contains('sun')) {
-        modal.classList.remove('active');
+    if (modal.classList.contains('active') && !modal.contains(e.target) && !e.target.closest('.planet, .sun')) {
+        closeModal();
     }
 });
 
-// 4. Lógica do Botão de Pausa
+// Fecha o modal com a tecla Esc
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// ===== 4. Lógica do Botão de Pausa =====
 const pauseBtn = document.getElementById('pause-btn');
 const solarSystem = document.querySelector('.solar-system');
 let isPaused = false;
@@ -137,16 +159,68 @@ pauseBtn.addEventListener('click', () => {
     pauseBtn.innerText = isPaused ? "Retomar Órbitas ▶️" : "Pausar Órbitas ⏸️";
 });
 
-// 5. Lógica do Gargantua
+// ===== 5. Lógica do Botão de Reiniciar =====
+const resetBtn = document.getElementById('reset-btn');
+resetBtn.addEventListener('click', () => {
+    location.reload();
+});
+
+// ===== 6. Lógica do Gargantua (Sucção gravitacional individual) =====
 const gargantua = document.getElementById('gargantua');
+let isSucking = false; // Impede múltiplos cliques durante a animação
 
 gargantua.addEventListener('click', () => {
-    solarSystem.classList.add('sucked');
-    starfield.style.opacity = '0';
-    document.body.style.background = '#000000';
-    
+    if (isSucking) return; // Se já está sugando, ignora
+    isSucking = true;
+
+    closeModal();
     pauseBtn.style.opacity = '0';
     pauseBtn.style.pointerEvents = 'none';
-    
-    modal.classList.remove('active');
+    starfield.style.opacity = '0';
+    document.body.style.background = '#000000';
+
+    // Esconde as linhas das órbitas suavemente
+    document.querySelectorAll('.orbit').forEach(orbit => {
+        orbit.style.opacity = '0';
+    });
+
+    // Coleta a posição exata do centro do Gargantua na tela
+    const gargantuaRect = gargantua.getBoundingClientRect();
+    const targetX = gargantuaRect.left + gargantuaRect.width / 2;
+    const targetY = gargantuaRect.top + gargantuaRect.height / 2;
+
+    // Pega todos os astros (Sol e Planetas)
+    const allAstros = document.querySelectorAll('.sun, .planet');
+
+    allAstros.forEach((astro, index) => {
+        // Pausa animações CSS para assumir o controle via JS
+        astro.style.animation = 'none';
+        
+        // Pega a posição atual exata do astro na tela
+        const rect = astro.getBoundingClientRect();
+        const currentX = rect.left + rect.width / 2;
+        const currentY = rect.top + rect.height / 2;
+
+        // Move o astro para o body em coordenadas absolutas (fixas na tela)
+        document.body.appendChild(astro);
+        astro.style.position = 'fixed';
+        astro.style.left = `${currentX - rect.width / 2}px`;
+        astro.style.top = `${currentY - rect.height / 2}px`;
+
+        // Pequeno atraso escalonado (efeito em cascata)
+        const delay = index * 120;
+
+        setTimeout(() => {
+            astro.style.transition = 'all 4.5s cubic-bezier(0.25, 1, 0.5, 1)';
+            astro.style.left = `${targetX - rect.width / 2}px`;
+            astro.style.top = `${targetY - rect.height / 2}px`;
+            astro.style.transform = 'scale(0.05) rotate(720deg)';
+            astro.style.opacity = '0';
+        }, delay);
+    });
+
+    // Exibe o botão de reiniciar logo após o término da sucção
+    setTimeout(() => {
+        resetBtn.classList.add('active');
+    }, 5500);
 });
