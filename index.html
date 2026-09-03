@@ -116,6 +116,39 @@
             transform: translateX(-50%) scale(1.05);
         }
 
+        /* Botão de Reiniciar (Aparece após a sucção) */
+        #reset-btn {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(11, 16, 33, 0.9);
+            color: #60a5fa;
+            border: 2px solid rgba(96, 165, 250, 0.8);
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 6000;
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        #reset-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        #reset-btn:hover {
+            background: #60a5fa;
+            color: #0b1021;
+            transform: translate(-50%, -50%) scale(1.08);
+        }
+
         /* Centralização do Sistema Solar */
         .solar-system {
             position: absolute;
@@ -287,6 +320,9 @@
     <!-- Botão de Pausa / Retomar na parte inferior central -->
     <button id="pause-btn">Pausar Órbitas ⏸️</button>
 
+    <!-- Botão de Reiniciar Sistema -->
+    <button id="reset-btn">Reiniciar Sistema Solar 🔄</button>
+
     <!-- Container do Sistema Solar -->
     <div class="solar-system">
         <!-- O Sol Real -->
@@ -452,104 +488,66 @@
             pauseBtn.innerText = isPaused ? "Retomar Órbitas ▶️" : "Pausar Órbitas ⏸️";
         });
 
-        // 5. Lógica do Gargantua (Suga ao clicar, Restaura ao clicar de novo)
+        // 5. Lógica do Botão de Reiniciar
+        const resetBtn = document.getElementById('reset-btn');
+        resetBtn.addEventListener('click', () => {
+            location.reload();
+        });
+
+        // 6. Lógica do Gargantua (Sucção gravitacional individual e ultra suave)
         const gargantua = document.getElementById('gargantua');
-        const allAstros = document.querySelectorAll('.sun, .planet');
-        const orbits = document.querySelectorAll('.orbit');
-        let isSucked = false;
 
         gargantua.addEventListener('click', () => {
             modal.classList.remove('active');
+            pauseBtn.style.opacity = '0';
+            pauseBtn.style.pointerEvents = 'none';
+            starfield.style.opacity = '0';
+            document.body.style.background = '#000000';
 
-            if (!isSucked) {
-                // ESTADO 1: SUGAR TUDO
-                isSucked = true;
-                pauseBtn.style.opacity = '0';
-                pauseBtn.style.pointerEvents = 'none';
-                starfield.style.opacity = '0';
-                document.body.style.background = '#000000';
+            // Esconde as linhas das órbitas suavemente
+            document.querySelectorAll('.orbit').forEach(orbit => {
+                orbit.style.opacity = '0';
+            });
 
-                orbits.forEach(orbit => {
-                    orbit.style.opacity = '0';
-                });
+            // Coleta a posição exata do centro do Gargantua na tela
+            const gargantuaRect = gargantua.getBoundingClientRect();
+            const targetX = gargantuaRect.left + gargantuaRect.width / 2;
+            const targetY = gargantuaRect.top + gargantuaRect.height / 2;
 
-                const gargantuaRect = gargantua.getBoundingClientRect();
-                const targetX = gargantuaRect.left + gargantuaRect.width / 2;
-                const targetY = gargantuaRect.top + gargantuaRect.height / 2;
+            // Pega todos os astros (Sol e Planetas)
+            const allAstros = document.querySelectorAll('.sun, .planet');
 
-                allAstros.forEach((astro, index) => {
-                    astro.style.animation = 'none';
-                    
-                    const rect = astro.getBoundingClientRect();
-                    const currentX = rect.left + rect.width / 2;
-                    const currentY = rect.top + rect.height / 2;
+            allAstros.forEach((astro, index) => {
+                // Pausa animações CSS para assumir o controle via JS
+                astro.style.animation = 'none';
+                
+                // Pega a posição atual exata do astro na tela
+                const rect = astro.getBoundingClientRect();
+                const currentX = rect.left + rect.width / 2;
+                const currentY = rect.top + rect.height / 2;
 
-                    // Guarda a posição original no dataset para poder retornar depois
-                    astro.dataset.origX = currentX;
-                    astro.dataset.origY = currentY;
+                // Move o astro para o body em coordenadas absolutas (fixas na tela)
+                document.body.appendChild(astro);
+                astro.style.position = 'fixed';
+                astro.style.left = `${currentX - rect.width / 2}px`;
+                astro.style.top = `${currentY - rect.height / 2}px`;
 
-                    document.body.appendChild(astro);
-                    astro.style.position = 'fixed';
-                    astro.style.left = `${currentX - rect.width / 2}px`;
-                    astro.style.top = `${currentY - rect.height / 2}px`;
+                // Pequeno atraso escalonado (efeito em cascata)
+                const delay = index * 120;
 
-                    const delay = index * 100;
+                setTimeout(() => {
+                    astro.style.transition = 'all 4.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                    astro.style.left = `${targetX - rect.width / 2}px`;
+                    astro.style.top = `${targetY - rect.height / 2}px`;
+                    astro.style.transform = 'scale(0.05) rotate(720deg)';
+                    astro.style.opacity = '0';
+                }, delay);
+            });
 
-                    setTimeout(() => {
-                        astro.style.transition = 'all 2s cubic-bezier(0.25, 1, 0.5, 1)';
-                        astro.style.left = `${targetX - rect.width / 2}px`;
-                        astro.style.top = `${targetY - rect.height / 2}px`;
-                        astro.style.transform = 'scale(0.05) rotate(720deg)';
-                        astro.style.opacity = '0';
-                    }, delay);
-                });
-
-            } else {
-                // ESTADO 2: RESTAURAR O SISTEMA SOLAR
-                isSucked = false;
-                document.body.style.background = 'radial-gradient(circle at center, #0b1021 0%, #020409 100%)';
-                starfield.style.opacity = '1';
-                pauseBtn.style.opacity = '1';
-                pauseBtn.style.pointerEvents = 'auto';
-
-                orbits.forEach(orbit => {
-                    orbit.style.opacity = '1';
-                });
-
-                allAstros.forEach((astro) => {
-                    const planetKey = astro.getAttribute('data-planet');
-                    const parentOrbit = document.querySelector(`.${planetKey}-orbit, .${planetKey === 'sun' ? 'solar-system' : ''}`);
-
-                    // Devolve o astro para dentro da sua órbita original
-                    if (planetKey === 'sun') {
-                        solarSystem.appendChild(astro);
-                        astro.style.position = 'absolute';
-                        astro.style.left = '';
-                        astro.style.top = '';
-                    } else {
-                        const orbitEl = document.querySelector(`.${planetKey}-orbit`);
-                        if (orbitEl) {
-                            orbitEl.appendChild(astro);
-                            astro.style.position = 'absolute';
-                            astro.style.left = '';
-                            astro.style.top = '';
-                        }
-                    }
-
-                    // Reseta transições e aplica animação de reaparecimento suave
-                    astro.style.transition = 'all 1.5s ease';
-                    astro.style.transform = 'scale(1) rotate(0deg)';
-                    astro.style.opacity = '1';
-
-                    // Reativa a animação orbital original após a transição
-                    setTimeout(() => {
-                        astro.style.transition = '';
-                        if (planetKey === 'sun') {
-                            astro.style.animation = 'pulse-sun 4s infinite alternate ease-in-out';
-                        }
-                    }, 1500);
-                });
-            }
+            // Exibe o botão de reiniciar logo após o término da sucção
+            setTimeout(() => {
+                resetBtn.classList.add('active');
+            }, 5500);
         });
     </script>
 </body>
